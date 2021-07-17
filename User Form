@@ -1,0 +1,159 @@
+Private Sub CommandButton1_Click()
+
+'Check for null values
+If ListBox1.Value <> "" & ListBox2.Value <> "" & ListBox3.Value <> "" Then
+    
+    On Error GoTo ErrorSkip:
+    
+    UserForm2_Month = ListBox1.Value
+    UserForm2_Day = ListBox2.Value
+    UserForm2_Year = ListBox3.Value
+    LeapYear = CInt(ListBox3.Value)
+    MonthTest = CInt(ListBox1.Value)
+    DayTest = CInt(ListBox2.Value)
+    
+'Check for leap year
+    If LeapYear Mod 4 = 0 And (LeapYear Mod 100 <> 0 Or LeapYear Mod 400 = 0) Then
+        LeapYearTest = True
+        
+        Else
+            LeapYearTest = False
+    End If
+    
+'Check for invalid dates
+    If MonthTest = 2 And DayTest = 31 Then
+    
+            MsgBox "Invalid Date: 2/31", , "Error"
+                        
+            ElseIf MonthTest = 2 And DayTest = 30 Then
+            MsgBox "Invalid Date: 2/30", , "Error"
+                                    
+            ElseIf MonthTest = 2 And DayTest = 29 And LeapYearTest = False Then
+            MsgBox "Non Leap Year - Invalid Date: 2/29 ", , "Error"
+                        
+            ElseIf MonthTest = 4 And DayTest = 31 Then
+            MsgBox "Invalid Date: 4/31", , "Error"
+                        
+            ElseIf MonthTest = 6 And DayTest = 31 Then
+            MsgBox "Invalid Date: 6/31", , "Error"
+                        
+            ElseIf MonthTest = 9 And DayTest = 31 Then
+            MsgBox "Invalid Date: 9/31", , "Error"
+                        
+            ElseIf MonthTest = 11 And DayTest = 31 Then
+            MsgBox "Invalid Date: 11/31", , "Error"
+                        
+            Else
+            
+'Unload user form
+            Unload Me
+            End If
+                
+            
+Else
+    
+ErrorSkip:
+    
+    MsgBox "You must select a date. Try again.", , "Null Error"
+
+End If
+
+End Sub
+
+Public Sub UserForm_Initialize()
+
+'Add values to list boxes on form
+
+'Month
+ListBox1.AddItem "1"
+ListBox1.AddItem "2"
+ListBox1.AddItem "3"
+ListBox1.AddItem "4"
+ListBox1.AddItem "5"
+ListBox1.AddItem "6"
+ListBox1.AddItem "7"
+ListBox1.AddItem "8"
+ListBox1.AddItem "9"
+ListBox1.AddItem "10"
+ListBox1.AddItem "11"
+ListBox1.AddItem "12"
+
+'Day
+ListBox2.AddItem "1"
+ListBox2.AddItem "2"
+ListBox2.AddItem "3"
+ListBox2.AddItem "4"
+ListBox2.AddItem "5"
+ListBox2.AddItem "6"
+ListBox2.AddItem "7"
+ListBox2.AddItem "8"
+ListBox2.AddItem "9"
+ListBox2.AddItem "10"
+ListBox2.AddItem "11"
+ListBox2.AddItem "12"
+ListBox2.AddItem "13"
+ListBox2.AddItem "14"
+ListBox2.AddItem "15"
+ListBox2.AddItem "16"
+ListBox2.AddItem "17"
+ListBox2.AddItem "18"
+ListBox2.AddItem "19"
+ListBox2.AddItem "20"
+ListBox2.AddItem "21"
+ListBox2.AddItem "22"
+ListBox2.AddItem "23"
+ListBox2.AddItem "24"
+ListBox2.AddItem "25"
+ListBox2.AddItem "26"
+ListBox2.AddItem "27"
+ListBox2.AddItem "28"
+ListBox2.AddItem "29"
+ListBox2.AddItem "30"
+ListBox2.AddItem "31"
+
+'Year
+ListBox3.AddItem "2023"
+ListBox3.AddItem "2022"
+ListBox3.AddItem "2021"
+ListBox3.AddItem "2020"
+ListBox3.AddItem "2019"
+ListBox3.AddItem "2018"
+ListBox3.AddItem "2017"
+ListBox3.AddItem "2016"
+ListBox3.AddItem "2015"
+ListBox3.AddItem "2014"
+ListBox3.AddItem "2013"
+ListBox3.AddItem "2012"
+ListBox3.AddItem "2011"
+ListBox3.AddItem "2010"
+ListBox3.AddItem "2009"
+ListBox3.AddItem "2008"
+ListBox3.AddItem "2007"
+ListBox3.AddItem "2006"
+ListBox3.AddItem "2005"
+ListBox3.AddItem "2004"
+ListBox3.AddItem "2003"
+ListBox3.AddItem "2002"
+ListBox3.AddItem "2001"
+ListBox3.AddItem "2000"
+
+End Sub
+
+Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
+
+'Make close button terminate macro
+If CloseMode = 0 Then
+If MsgBox("Are you sure you want to exit? Data that has not been submitted will not be saved. If you do not wish to " & _
+"exit, hit 'No' to return to the form. Otherwise, hit 'Yes' to exit the form.", vbQuestion + vbYesNo, "Ready to Exit?") = vbNo Then
+Cancel = True
+
+ProcessTerminate = False
+
+Else
+
+ProcessTerminate = True
+
+End If
+End If
+
+End Sub
