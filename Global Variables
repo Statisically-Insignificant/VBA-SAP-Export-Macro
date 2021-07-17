@@ -1,0 +1,11 @@
+Option Explicit
+Public UserForm1_Month As String
+Public UserForm1_Day As String
+Public UserForm1_Year As String
+Public LeapYear As Integer
+Public LeapYearTest As Boolean
+Public ProcessTerminate As Boolean
+
+Sub Global_Variables()
+
+End Sub
