@@ -1,0 +1,19 @@
+Private Declare PtrSafe Function CoRegisterMessageFilter Lib "ole32" (ByVal IFilterIn As Long, ByRef PreviousFilter) As Long
+
+'Run KillMessageFilter to disable OLE popups from interrupting the scripts
+Public Sub KillMessageFilter()
+
+   Dim IMsgFilter As Long
+
+   CoRegisterMessageFilter 0&, IMsgFilter
+
+End Sub
+
+' If you ever want to renable the filter run this
+Public Sub RestoreMessageFilter()
+
+   Dim IMsgFilter As Long
+
+   CoRegisterMessageFilter IMsgFilter, IMsgFilter
+
+End Sub
