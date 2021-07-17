@@ -5,9 +5,9 @@ If ListBox1.Value <> "" & ListBox2.Value <> "" & ListBox3.Value <> "" Then
     
     On Error GoTo ErrorSkip:
     
-    UserForm2_Month = ListBox1.Value
-    UserForm2_Day = ListBox2.Value
-    UserForm2_Year = ListBox3.Value
+    UserForm1_Month = ListBox1.Value
+    UserForm1_Day = ListBox2.Value
+    UserForm1_Year = ListBox3.Value
     LeapYear = CInt(ListBox3.Value)
     MonthTest = CInt(ListBox1.Value)
     DayTest = CInt(ListBox2.Value)
