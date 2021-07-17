@@ -1,0 +1,150 @@
+'This macro runs aging reports then exports them to html or xlsx files.
+
+Sub AgeTrialExport()
+
+'Disable Excel Alerts
+    Application.EnableEvents = False
+    Application.DisplayAlerts = False
+                                                                                                          
+                                                        
+'==========================================================SAP Connection===============================================================================
+
+'Declare Objects
+    Dim Appl As Object
+    Dim Connection As Object
+    Dim session As Object
+    Dim WshShell As Object
+    Dim SapGui As Object
+    Dim Result As String
+    Dim ErrorBox
+    Dim InsertDate As String
+    Dim ReString As String
+    
+'Call Userform for Date Entry
+    UserForm1.Show
+
+'Errors
+    On Error GoTo DisplayError:
+
+'Concatenate Date and Assign to Result
+    Result = UserForm1_Month & "/" & UserForm1_Day & "/" & UserForm1_Year
+
+'Userform Error Handling
+       
+    'Cancel Button Clicked
+    If ProcessTerminate = True Then
+    
+        MsgBox "Report has been cancelled.", , "Process Terminated"
+        
+        End
+        
+    End If
+    
+    'No Date Entered
+    If Result = "//" Then
+    
+        ErrorBox = MsgBox("No date entered. Try again.", , "Error")
+        
+        End
+               
+    Else
+
+'Change File Directory
+    Shell "C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplogon.exe", 4
+    Set WshShell = CreateObject("WScript.Shell")
+    
+    Do Until WshShell.AppActivate("SAP Logon ")
+        Application.Wait Now + TimeValue("0:00:01")
+    Loop
+    
+    Set WshShell = Nothing
+
+    Set SapGui = GetObject("SAPGUI")
+    Set Appl = SapGui.GetScriptingEngine
+    Set Connection = Appl.Openconnection("[Insert Module Name]", _
+        True)
+    Set session = Connection.Children(0)
+
+'Pass Username and Password
+    session.findById("wnd[0]/usr/txtRSYST-MANDT").Text = "[insert module code"
+    session.findById("wnd[0]/usr/txtRSYST-BNAME").Text = "[insert user name]"
+    session.findById("wnd[0]/usr/pwdRSYST-BCODE").Text = "[insert password]"
+    session.findById("wnd[0]/usr/txtRSYST-LANGU").Text = "[insert language key (EN for English)]"
+
+    If session.Children.Count > 1 Then
+    
+        answer = MsgBox("You've got opened SAP already," & _
+    "please leave and try again", vbOKOnly, "Opened SAP")
+    
+        session.findById("wnd[1]/usr/radMULTI_LOGON_OPT3").Select
+        session.findById("wnd[1]/usr/radMULTI_LOGON_OPT3").SetFocus
+        session.findById("wnd[1]/tbar[0]/btn[0]").press
+    
+        Exit Sub
+
+    End If
+
+    session.findById("wnd[0]").maximize
+    session.findById("wnd[0]").sendVKey 0 'ENTER
+
+'SAP Code Injection
+    session.findById("wnd[0]").maximize
+
+'==========================================================CIS ATB===============================================================================
+
+'Open ATB Node
+    session.findById("wnd[0]/usr/cntlIMAGE_CONTAINER/shellcont/shell/shellcont[0]/shell").doubleClickNode "F00020"
+
+'Input Full Report Info
+    session.findById("wnd[0]/usr/ctxtDD_BUKRS-LOW").Text = "[insert company code]"
+    
+    'Date Entry
+    session.findById("wnd[0]/usr/ctxtDD_STIDA").Text = Result
+    session.findById("wnd[0]/usr/ctxtDD_BUKRS-LOW").SetFocus
+    session.findById("wnd[0]/usr/ctxtDD_BUKRS-LOW").caretPosition = 4
+    session.findById("wnd[0]/tbar[1]/btn[16]").press
+    
+    'Account Abbreviation
+    session.findById("wnd[0]/usr/ssub%_SUBSCREEN_%_SUB%_CONTAINER:SAPLSSEL:2001/ssubSUBSCREEN_CONTAINER2:SAPLSSEL:2000/ssubSUBSCREEN_CONTAINER:SAPLSSEL:1106/ctxt%%DYN007-LOW").Text = "[insert account abbreviation]"
+    session.findById("wnd[0]/usr/ssub%_SUBSCREEN_%_SUB%_CONTAINER:SAPLSSEL:2001/ssubSUBSCREEN_CONTAINER2:SAPLSSEL:2000/ssubSUBSCREEN_CONTAINER:SAPLSSEL:1106/ctxt%%DYN007-LOW").SetFocus
+    session.findById("wnd[0]/usr/ssub%_SUBSCREEN_%_SUB%_CONTAINER:SAPLSSEL:2001/ssubSUBSCREEN_CONTAINER2:SAPLSSEL:2000/ssubSUBSCREEN_CONTAINER:SAPLSSEL:1106/ctxt%%DYN007-LOW").caretPosition = 2
+    session.findById("wnd[0]").sendVKey 0
+    session.findById("wnd[0]/tbar[1]/btn[8]").press
+    
+'Load Variant, Change Layout and Sort Columns
+    session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").pressToolbarContextButton "&MB_VARIANT"
+    session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").selectContextMenuItem "&LOAD"
+    session.findById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").setCurrentCell 1, "TEXT"
+    session.findById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").selectedRows = "1"
+    session.findById("wnd[1]/usr/ssubD0500_SUBSCREEN:SAPLSLVC_DIALOG:0501/cntlG51_CONTAINER/shellcont/shell").clickCurrentCell
+    session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").setCurrentCell -1, "NAME"
+    session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").selectColumn "NAME"
+    session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").pressToolbarButton "&SORT_ASC"
+  
+'Export Full Report to File
+    
+      'Excel Export Block: Excel automatically opens and locks itself from editing while macro is running. Export to html to keep files from opening.
+    'session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").pressToolbarContextButton "&MB_EXPORT"
+    'session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").selectContextMenuItem "&XXL"
+    'session.findById("wnd[1]/usr/ctxtDY_PATH").Text = "[Insert Export Path]
+    'session.findById("wnd[1]/usr/ctxtDY_FILENAME").Text = "[Insert File name].XLSX"
+    'session.findById("wnd[1]/usr/ctxtDY_FILENAME").caretPosition = 20
+    'session.findById("wnd[1]/tbar[0]/btn[11]").press
+    
+      'Html Export Block
+    session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").pressToolbarContextButton "&MB_EXPORT"
+    session.findById("wnd[0]/usr/cntlCONT/shellcont/shell").selectContextMenuItem "&PC"
+    session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[3,0]").Select
+    session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[3,0]").SetFocus
+    session.findById("wnd[1]/tbar[0]/btn[0]").press
+    session.findById("wnd[1]/usr/ctxtDY_PATH").Text = "[Insert Export Path]
+    session.findById("wnd[1]/usr/ctxtDY_FILENAME").Text = "[Insert File Name].htm"
+    session.findById("wnd[1]/usr/ctxtDY_FILENAME").caretPosition = 16
+    session.findById("wnd[1]/tbar[0]/btn[11]").press
+    
+'Back to ATB Page
+    session.findById("wnd[0]/tbar[0]/btn[3]").press
+    session.findById("wnd[0]/tbar[1]/btn[16]").press
+ 
+ 'Repeat Code For Each Account You Want To Export
+ 
